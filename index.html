@@ -181,16 +181,29 @@
                         };
                         
                         console.log('🏪 About to store auth result:', authResult);
+                        console.log('🔧 Checking if chrome.storage is available:', typeof chrome.storage);
+                        
+                        if (!chrome.storage) {
+                            console.error('❌ Chrome storage API not available!');
+                            return;
+                        }
                         
                         // Use Chrome storage to communicate with extension
+                        console.log('📝 Calling chrome.storage.local.set...');
                         chrome.storage.local.set({
                             [`meetmindr_auth_${extensionId}`]: authResult
                         }, () => {
+                            console.log('📞 Chrome storage callback called');
                             if (chrome.runtime.lastError) {
                                 console.error('❌ Chrome storage error:', chrome.runtime.lastError);
                             } else {
                                 console.log('✅ Authentication result stored in Chrome storage successfully!');
                                 console.log('🔑 Storage key:', `meetmindr_auth_${extensionId}`);
+                                
+                                // Verify the data was stored by reading it back
+                                chrome.storage.local.get([`meetmindr_auth_${extensionId}`], (result) => {
+                                    console.log('🔍 Verification read from storage:', result);
+                                });
                             }
                         });
                         
