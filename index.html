@@ -204,20 +204,10 @@
                             console.error('❌ localStorage error:', storageError);
                         }
                         
-                        // Also try runtime message as fallback
-                        chrome.runtime.sendMessage(extensionId, {
-                            type: 'meetmindr-auth-success',
-                            extensionId: extensionId,
-                            user: {
-                                uid: user.uid,
-                                email: user.email,
-                                displayName: user.displayName,
-                                photoURL: user.photoURL
-                            }
-                        });
-                        console.log('Message sent successfully to extension');
+                        console.log('✅ Authentication process completed successfully!');
+                        
                     } catch (e) {
-                        console.log('Could not send message to extension:', e);
+                        console.log('Authentication error:', e);
                     }
                 } else {
                     console.log('No extension ID found in URL parameters');
