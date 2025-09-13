@@ -229,6 +229,10 @@
                 } else {
                     console.log('No extension ID found in URL parameters');
                 }
+
+                setTimeout(() => {
+                    window.close();
+                }, 3000);
             
                 
             } catch (error) {
