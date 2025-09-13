@@ -183,29 +183,26 @@
                         console.log('🏪 About to store auth result:', authResult);
                         console.log('🔧 Checking if chrome.storage is available:', typeof chrome.storage);
                         
-                        if (!chrome.storage) {
-                            console.error('❌ Chrome storage API not available!');
-                            return;
-                        }
+                        // Since chrome.storage is not available from GitHub Pages,
+                        // we'll use localStorage instead as a communication method
+                        console.log('� Using localStorage instead of Chrome storage');
                         
-                        // Use Chrome storage to communicate with extension
-                        console.log('📝 Calling chrome.storage.local.set...');
-                        chrome.storage.local.set({
-                            [`meetmindr_auth_${extensionId}`]: authResult
-                        }, () => {
-                            console.log('📞 Chrome storage callback called');
-                            if (chrome.runtime.lastError) {
-                                console.error('❌ Chrome storage error:', chrome.runtime.lastError);
-                            } else {
-                                console.log('✅ Authentication result stored in Chrome storage successfully!');
-                                console.log('🔑 Storage key:', `meetmindr_auth_${extensionId}`);
-                                
-                                // Verify the data was stored by reading it back
-                                chrome.storage.local.get([`meetmindr_auth_${extensionId}`], (result) => {
-                                    console.log('🔍 Verification read from storage:', result);
-                                });
-                            }
-                        });
+                        try {
+                            const storageKey = `meetmindr_auth_${extensionId}`;
+                            localStorage.setItem(storageKey, JSON.stringify(authResult));
+                            console.log('✅ Authentication result stored in localStorage successfully!');
+                            console.log('🔑 Storage key:', storageKey);
+                            
+                            // Verify the data was stored
+                            const storedData = localStorage.getItem(storageKey);
+                            console.log('� Verification read from localStorage:', JSON.parse(storedData));
+                            
+                            // Show success message in UI as well
+                            showStatus('✅ Successfully signed in! Check your extension.', 'success');
+                            
+                        } catch (storageError) {
+                            console.error('❌ localStorage error:', storageError);
+                        }
                         
                         // Also try runtime message as fallback
                         chrome.runtime.sendMessage(extensionId, {
