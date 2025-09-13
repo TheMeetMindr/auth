@@ -159,7 +159,7 @@
                     }, { merge: true });
                 }
                 
-                showStatus('✅ Successfully signed in! You can close this tab.', 'success');
+                showStatus('✅ Successfully signed in! Authentication complete.', 'success');
                 
                 // Send success message to extension
                 const urlParams = new URLSearchParams(window.location.search);
@@ -180,11 +180,18 @@
                             }
                         };
                         
+                        console.log('🏪 About to store auth result:', authResult);
+                        
                         // Use Chrome storage to communicate with extension
                         chrome.storage.local.set({
                             [`meetmindr_auth_${extensionId}`]: authResult
                         }, () => {
-                            console.log('Authentication result stored in Chrome storage');
+                            if (chrome.runtime.lastError) {
+                                console.error('❌ Chrome storage error:', chrome.runtime.lastError);
+                            } else {
+                                console.log('✅ Authentication result stored in Chrome storage successfully!');
+                                console.log('🔑 Storage key:', `meetmindr_auth_${extensionId}`);
+                            }
                         });
                         
                         // Also try runtime message as fallback
@@ -205,6 +212,7 @@
                 } else {
                     console.log('No extension ID found in URL parameters');
                 }
+            
                 
             } catch (error) {
                 console.error('Sign-in popup error:', error);
