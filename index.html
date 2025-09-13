@@ -181,21 +181,38 @@
                         };
                         
                         console.log('🏪 About to store auth result:', authResult);
-                        console.log('🔧 Checking if chrome.storage is available:', typeof chrome.storage);
-                        
-                        // Since chrome.storage is not available from GitHub Pages,
-                        // we'll use localStorage instead as a communication method
-                        console.log('� Using localStorage instead of Chrome storage');
+                        console.log('🔧 Switching to Firestore for extension communication');
                         
                         try {
-                            const storageKey = `meetmindr_auth_${extensionId}`;
-                            localStorage.setItem(storageKey, JSON.stringify(authResult));
-                            console.log('✅ Authentication result stored in localStorage successfully!');
-                            console.log('🔑 Storage key:', storageKey);
+                            // Import Firestore modules
+                            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js');
+                            const { getFirestore, doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js');
                             
-                            // Verify the data was stored
-                            const storedData = localStorage.getItem(storageKey);
-                            console.log('� Verification read from localStorage:', JSON.parse(storedData));
+                            const firebaseConfig = {
+                                apiKey: "AIzaSyBux6IaOc3f5MkWtoqSuVHSbG4UVanJ7Qk",
+                                authDomain: "meetmindr-24559.firebaseapp.com",
+                                projectId: "meetmindr-24559",
+                                storageBucket: "meetmindr-24559.firebasestorage.app",
+                                messagingSenderId: "202482079292",
+                                appId: "1:202482079292:web:ea0db9affd42f104829539",
+                                measurementId: "G-RHM7YTW9H9"
+                            };
+                            
+                            console.log('🔄 Initializing Firestore connection...');
+                            const app = initializeApp(firebaseConfig);
+                            const firestoreDb = getFirestore(app);
+                            
+                            // Store auth result in Firestore with extension ID as document ID
+                            const authDocRef = doc(firestoreDb, 'extension_auth', extensionId);
+                            await setDoc(authDocRef, {
+                                ...authResult,
+                                createdAt: new Date(),
+                                ttl: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes TTL
+                            });
+                            
+                            console.log('✅ Authentication result stored in Firestore successfully!');
+                            console.log('🔑 Document ID:', extensionId);
+                            console.log('🔍 Stored document data:', authResult);
                             
                             // Show success message in UI as well
                             showStatus('✅ Successfully signed in! Check your extension.', 'success');
