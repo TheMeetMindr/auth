@@ -168,7 +168,7 @@
                 if (extensionId) {
                     try {
                         chrome.runtime.sendMessage(extensionId, {
-                            type: 'auth-success',
+                            type: 'meetmindr-auth-success',
                             extensionId: extensionId,
                             user: {
                                 uid: user.uid,
